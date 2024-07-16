@@ -8,6 +8,7 @@ import { ReportType } from "../../interfaces";
 import { FaRegFilePdf } from "react-icons/fa";
 import { Tooltip } from "antd";
 import { useReactToPrint } from "react-to-print";
+import { PDFDocument, rgb } from 'pdf-lib';
 
 type Props = {};
 
@@ -15,6 +16,125 @@ const Reports = (props: Props) => {
     const [data, setData] = useState<ReportType[]>([]);
 
     const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
+
+    let pageHeigth = 842;
+    let pageWidth = 595;
+    async function createPdfWithEditableFields() {
+        const pdfDoc = await PDFDocument.create();
+
+        //   Add A4 sheet
+        const page = pdfDoc.addPage([595, 842]);
+        const form = pdfDoc.getForm();
+
+        // Helper function to add text fields
+        const addTextField = (name: any, x: any, y: any, width: any, height: any, value: any) => {
+            const textField = form.createTextField(name);
+            textField.setText(value);
+            textField.setMaxLength(1);  // Set max length to 1
+            textField.addToPage(page, { x: x, y: pageHeigth - y, width, height, borderColor: rgb(1, 0, 0), borderWidth: 1 });
+        };
+
+        // Adding fields with values from the selectedReport
+        let carInsuranceId = selectedReport?.car_insurance_id || "";
+        for (let i = 0; i < 29; i++) {
+            addTextField('Car Insurance ID' + i, 20 + (16*i), 260, 16, 16, carInsuranceId[i] || '');
+        }
+        page.drawText('Pflegeversichertennummer (ggf. entspricht diese der Krankenversichertennummer)', {
+            x: 20,
+            y: pageHeigth - 272,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+
+
+        let lastName = selectedReport?.last_name || "";
+        for (let i = 0; i < 29; i++) {
+            addTextField('Last Name' + i, 20 + (16*i), 316, 16, 20, lastName[i] || '');
+        }
+        page.drawText('Name', {
+            x: 20,
+            y: pageHeigth - 332,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+
+        let firstName = selectedReport?.first_name || "";
+        for (let i = 0; i < 29; i++) {
+            addTextField('First Name' + i, 20 + (16*i), 380, 16, 16, firstName[i] || '');
+        }
+        page.drawText('Vorname', {
+            x: 20,
+            y: pageHeigth - 392,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+
+        let dob = selectedReport?.dob || "";
+        for (let i = 0; i < 8; i++) {
+            addTextField('Date of Birth' + i, 20 + (16*i), 440, 16, 16, dob[i] || '');
+        }
+        page.drawText('Geburtsdatum', {
+            x: 20,
+            y: pageHeigth - 452,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+
+        let street = selectedReport?.street || "";
+        for (let i = 0; i < 29; i++) {
+            addTextField('Street' + i, 20 + (16*i), 500, 16, 16, street[i] || '');
+        }
+        page.drawText('Straße', {
+            x: 20,
+            y: pageHeigth - 512,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+
+        let postalCode = selectedReport?.postal_code || "";
+        for (let i = 0; i < 5; i++) {
+            addTextField('Postal Code' + i, 20 + (16*i), 560, 16, 16, postalCode[i] || '');
+        }
+        page.drawText('PLZ', {
+            x: 20,
+            y: pageHeigth - 572,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+
+        let city = selectedReport?.city || "";
+        for (let i = 0; i < 23; i++) {
+            addTextField('City' + i, 16 + 100 + (16*i), 560, 16, 16, city[i] || '');
+        }
+        page.drawText('Ort', {
+            x: 16 + 100,
+            y: pageHeigth - 572,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+        page.drawText('Nachweis über einen Beratungsbesuch nach § 37 Abs. 3 SGB XI', {
+            x: 20,
+            y: pageHeigth - 150,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+
+        page.drawText('Angaben zur pflegebedürftigen Person:', {
+            x: 20,
+            y: pageHeigth - 180,
+            size: 12,
+            color: rgb(0, 0, 0),
+        });
+
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'editable_form.pdf';
+        a.click();
+    }
 
     const componentRef = useRef<any>();
     const handlePrint = useReactToPrint({
@@ -94,7 +214,7 @@ const Reports = (props: Props) => {
                                             return val;
                                         });
                                         setTimeout(() => {
-                                            handlePrint();
+                                            createPdfWithEditableFields();
                                         }, 1000)
                                     }}
                                 >
@@ -169,11 +289,16 @@ const Reports = (props: Props) => {
                                             {
                                                 // Create Empty boxes of length 10
                                                 Array.from({ length: 29 }).map((_, index) => (
-                                                    <div key={index} className="h-5 w-5 border text-sm border-red-500 flex items-center justify-center">
-                                                        {
-                                                            selectedReport?.first_name[index]
-                                                        }
-                                                    </div>
+                                                    // <div key={index} className="h-5 w-5 border text-sm border-red-500 flex items-center justify-center">
+                                                    //     {
+                                                    //         selectedReport?.first_name[index]
+                                                    //     }
+                                                    // </div>
+                                                    <input
+                                                        type="text"
+                                                        className="h-5 w-5 border text-sm border-red-500 flex items-center justify-center"
+                                                        value={selectedReport?.first_name[index]}
+                                                    />
                                                 ))
                                             }
                                         </div>
@@ -221,7 +346,7 @@ const Reports = (props: Props) => {
                                             <div className="flex items-center">
                                                 {
                                                     // Create Empty boxes of length 10
-                                                    Array.from({ length:5 }).map((_, index) => (
+                                                    Array.from({ length: 5 }).map((_, index) => (
                                                         <div key={index} className="h-5 w-5 border text-sm border-red-500 flex items-center justify-center">
                                                             {
                                                                 selectedReport?.postal_code[index]
@@ -231,7 +356,7 @@ const Reports = (props: Props) => {
                                                 }
                                             </div>
                                             <h5>
-                                            PLZ
+                                                PLZ
                                             </h5>
                                         </div>
                                         <div>
@@ -248,7 +373,7 @@ const Reports = (props: Props) => {
                                                 }
                                             </div>
                                             <h5>
-                                            Ort
+                                                Ort
                                             </h5>
                                         </div>
                                     </div>
