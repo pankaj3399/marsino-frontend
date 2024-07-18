@@ -19,7 +19,7 @@ const Reports = (props: Props) => {
 
     let pageHeigth = 842;
     let pageWidth = 595;
-    async function createPdfWithEditableFields() {
+    async function createPdfWithEditableFields(selReport:any) {
         const pdfDoc = await PDFDocument.create();
 
         //   Add A4 sheet
@@ -30,15 +30,13 @@ const Reports = (props: Props) => {
         const addTextField = (name: any, x: any, y: any, width: any, height: any, value: any) => {
             const textField = form.createTextField(name);
             textField.setText(value);
-            textField.setMaxLength(1);  // Set max length to 1
+            // textField.setMaxLength(1);  // Set max length to 1
             textField.addToPage(page, { x: x, y: pageHeigth - y, width, height, borderColor: rgb(1, 0, 0), borderWidth: 1 });
         };
 
         // Adding fields with values from the selectedReport
-        let carInsuranceId = selectedReport?.car_insurance_id || "";
-        for (let i = 0; i < 29; i++) {
-            addTextField('Car Insurance ID' + i, 20 + (16*i), 260, 16, 16, carInsuranceId[i] || '');
-        }
+        let carInsuranceId = selReport?.car_insurance_id || "";
+            addTextField('Car Insurance ID', 20, 260, 16*29, 16, carInsuranceId|| '');
         page.drawText('Pflegeversichertennummer (ggf. entspricht diese der Krankenversichertennummer)', {
             x: 20,
             y: pageHeigth - 272,
@@ -47,10 +45,8 @@ const Reports = (props: Props) => {
         });
 
 
-        let lastName = selectedReport?.last_name || "";
-        for (let i = 0; i < 29; i++) {
-            addTextField('Last Name' + i, 20 + (16*i), 316, 16, 20, lastName[i] || '');
-        }
+        let lastName = selReport?.last_name || "";
+        addTextField('Last Name', 20, 316, 16*29, 16, lastName || '');
         page.drawText('Name', {
             x: 20,
             y: pageHeigth - 332,
@@ -58,10 +54,8 @@ const Reports = (props: Props) => {
             color: rgb(0, 0, 0),
         });
 
-        let firstName = selectedReport?.first_name || "";
-        for (let i = 0; i < 29; i++) {
-            addTextField('First Name' + i, 20 + (16*i), 380, 16, 16, firstName[i] || '');
-        }
+        let firstName = selReport?.first_name || "";
+        addTextField('First Name', 20, 380, 16*29, 16, firstName || '');
         page.drawText('Vorname', {
             x: 20,
             y: pageHeigth - 392,
@@ -69,10 +63,8 @@ const Reports = (props: Props) => {
             color: rgb(0, 0, 0),
         });
 
-        let dob = selectedReport?.dob || "";
-        for (let i = 0; i < 8; i++) {
-            addTextField('Date of Birth' + i, 20 + (16*i), 440, 16, 16, dob[i] || '');
-        }
+        let dob = selReport?.dob || "";
+            addTextField('Date of Birth', 20, 440, 16*10, 16, dob || '');
         page.drawText('Geburtsdatum', {
             x: 20,
             y: pageHeigth - 452,
@@ -80,10 +72,8 @@ const Reports = (props: Props) => {
             color: rgb(0, 0, 0),
         });
 
-        let street = selectedReport?.street || "";
-        for (let i = 0; i < 29; i++) {
-            addTextField('Street' + i, 20 + (16*i), 500, 16, 16, street[i] || '');
-        }
+        let street = selReport?.street || "";
+        addTextField('Street', 20, 500, 16*29, 16, street || '');
         page.drawText('Straße', {
             x: 20,
             y: pageHeigth - 512,
@@ -91,10 +81,8 @@ const Reports = (props: Props) => {
             color: rgb(0, 0, 0),
         });
 
-        let postalCode = selectedReport?.postal_code || "";
-        for (let i = 0; i < 5; i++) {
-            addTextField('Postal Code' + i, 20 + (16*i), 560, 16, 16, postalCode[i] || '');
-        }
+        let postalCode = selReport?.postal_code || "";
+        addTextField('Postal Code', 20, 560, 16*5, 16, postalCode || '');
         page.drawText('PLZ', {
             x: 20,
             y: pageHeigth - 572,
@@ -102,10 +90,8 @@ const Reports = (props: Props) => {
             color: rgb(0, 0, 0),
         });
 
-        let city = selectedReport?.city || "";
-        for (let i = 0; i < 23; i++) {
-            addTextField('City' + i, 16 + 100 + (16*i), 560, 16, 16, city[i] || '');
-        }
+        let city = selReport?.city || "";
+        addTextField('City', 16 + 100, 560, 16*23, 16, city || '');
         page.drawText('Ort', {
             x: 16 + 100,
             y: pageHeigth - 572,
@@ -214,7 +200,7 @@ const Reports = (props: Props) => {
                                             return val;
                                         });
                                         setTimeout(() => {
-                                            createPdfWithEditableFields();
+                                            createPdfWithEditableFields(val);
                                         }, 1000)
                                     }}
                                 >
